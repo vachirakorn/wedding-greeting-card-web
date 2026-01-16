@@ -61,7 +61,19 @@ const upload = multer({ storage: multer.memoryStorage() });
 app.set('trust proxy', 1); // Trust the first proxy (Nginx on Bitnami)
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+
+// Serve static files with caching headers
+app.use(express.static(path.join(__dirname, 'public'), {
+  maxAge: '1d', // Cache static files for 1 day
+  etag: false,  // Disable etag for better caching
+  lastModified: true,
+  setHeaders: (res, path) => {
+    // Log static file access
+    if (path.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|webp)$/i)) {
+      logger.debug('Static file served', { file: path });
+    }
+  }
+}));
 
 // Initialize Google Drive API with OAuth 2.0
 function getDriveService() {
