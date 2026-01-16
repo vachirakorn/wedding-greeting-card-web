@@ -58,6 +58,7 @@ const credentials = JSON.parse(fs.readFileSync(path.join(__dirname, 'credentials
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Middleware
+app.set('trust proxy', 1); // Trust the first proxy (Nginx on Bitnami)
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
