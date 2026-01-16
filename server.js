@@ -107,6 +107,12 @@ app.get('/api/health', (req, res) => {
 // Upload endpoint
 app.post('/api/upload', upload.single('file'), async (req, res) => {
   try {
+
+    if (config.ENABLE_UPLOAD_IMAGE !== true) {
+      logger.warn('Upload attempt when uploads are disabled. Please contact moderator to enable uploads.', { ip: req.ip });
+      return res.status(503).json({ error: 'File uploads are currently disabled' });
+    }
+
     if (!req.file) {
       logger.warn('Upload attempt without file', { ip: req.ip });
       return res.status(400).json({ error: 'No file uploaded' });
