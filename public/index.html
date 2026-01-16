@@ -285,6 +285,87 @@
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+        
+        /* Mobile Responsive: Reduce size by 25% (scale to 0.75) for screens < 431px */
+        @media (max-width: 430px) {
+            body {
+                padding: 15px;
+            }
+            
+            .container {
+                gap: 22.5px;
+            }
+            
+            h1 {
+                font-size: 24px;
+                margin-bottom: 7.5px;
+                text-shadow: 1.5px 1.5px 3px rgba(0, 0, 0, 0.2);
+            }
+            
+            .subtitle {
+                font-size: 12px;
+            }
+            
+            .upload-section {
+                gap: 15px;
+            }
+            
+            .polaroid-frame {
+                padding: 9px;
+                max-width: 262.5px;
+            }
+            
+            .upload-icon {
+                font-size: 36px;
+            }
+            
+            .upload-text {
+                font-size: 12px;
+            }
+            
+            .upload-hint {
+                font-size: 9px;
+            }
+            
+            .crop-btn {
+                padding: 6px 12px;
+                border-radius: 15px;
+                font-size: 10px;
+            }
+            
+            .polaroid-label {
+                padding: 9px;
+                font-size: 10.5px;
+                min-height: 30px;
+            }
+            
+            .filename {
+                font-size: 10px;
+            }
+            
+            button {
+                padding: 10.5px 30px;
+                border-radius: 40px;
+                font-size: 12px;
+            }
+            
+            .spinner {
+                width: 30px;
+                height: 30px;
+                border: 3px solid rgba(255, 255, 255, 0.3);
+                border-top: 3px solid white;
+            }
+            
+            .loading p {
+                font-size: 10.5px;
+            }
+            
+            .message {
+                padding: 9px 15px;
+                border-radius: 6px;
+                font-size: 12px;
+            }
+        }
     </style>
 </head>
 <body>
