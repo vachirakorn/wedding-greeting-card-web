@@ -6,7 +6,7 @@ const fs = require('fs');
 const { google } = require('googleapis');
 
 const app = express();
-const PORT = process.env.PORT || 80;
+const PORT = process.env.PORT || 3000;
 
 // Load configuration and credentials
 const config = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json'), 'utf8'));
