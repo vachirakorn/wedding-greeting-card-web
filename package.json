@@ -1,0 +1,20 @@
+{
+  "name": "wedding-greeting-card-server",
+  "version": "1.0.0",
+  "description": "Express.js server for wedding greeting card application",
+  "main": "node.js",
+  "scripts": {
+    "start": "node node.js",
+    "dev": "nodemon node.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "multer": "^1.4.5-lts.1",
+    "google-auth-library": "^9.0.0",
+    "googleapis": "^118.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
