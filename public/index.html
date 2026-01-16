@@ -13,7 +13,7 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #dfd25f 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -288,7 +288,7 @@
     <div class="container">
         <div class="header">
             <h1>📸 Wedding Greeting Card</h1>
-            <p class="subtitle">Upload your photo to print it at the reception desk!</p>
+            <p class="subtitle">ขั้นตอนที่ 1: ถ่ายภาพของเพื่อนๆ ที่งานแล้วกดอัปโหลดเพื่อพิมพ์การ์ดได้เลยครับ<br>Step 1: Take a photo at the wedding and upload it to print your greeting card.</p>
         </div>
         
         <div class="upload-section">
@@ -411,7 +411,7 @@
                 const data = await response.json();
                 
                 if (response.ok) {
-                    showMessage('Photo uploaded successfully! We\'re printing your card at the reception desk ✨\nอัปโหลดสำเร็จ! เรากำลังพิมพ์การ์ดอวยพรของคุณที่โต๊ะรับแขก สามารถเขียนข้อความอวยพรบ่าวสาวได้บนการ์ดแล้วแปะบนบอร์ดเลยครับ 👰🤵💌', 'success');
+                    showMessage('อัปโหลดสำเร็จ! ขั้นตอนที่ 2: เรากำลังพิมพ์การ์ดอวยพรของคุณที่โต๊ะรับแขก สามารถเขียนข้อความอวยพรบ่าวสาวบนการ์ด แล้วนำไปจัดแสดงบนบอร์ดเลยครับ 👰🤵💌\nStep 2: We\'re printing your greeting card at the reception desk. You can write a message for the bride and groom on the card and display it on the board.', 'success');
                     resetForm();
                 } else {
                     showMessage(`Error: ${data.error || 'Upload failed'}`, 'error');
