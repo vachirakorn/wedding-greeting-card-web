@@ -22,102 +22,198 @@
         }
         
         .container {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            padding: 40px;
-            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            max-width: 600px;
             width: 100%;
         }
         
-        h1 {
+        .header {
             text-align: center;
-            color: #333;
+            color: white;
+        }
+        
+        h1 {
+            font-size: 32px;
             margin-bottom: 10px;
-            font-size: 28px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
         }
         
         .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 14px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
         }
         
         .upload-section {
             display: flex;
             flex-direction: column;
             gap: 20px;
+            width: 100%;
+            align-items: center;
         }
         
-        .upload-label {
+        /* Polaroid Frame Styles */
+        .polaroid-frame {
+            background: #ffffff;
+            padding: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3),
+                        0 0 0 1px rgba(0, 0, 0, 0.1);
+            transform: rotate(-2deg);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 350px;
+            width: 100%;
+            aspect-ratio: 88 / 107;
+        }
+        
+        .polaroid-frame:hover {
+            transform: rotate(-2deg) translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4),
+                        0 0 0 1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .polaroid-content {
+            background: #f5f5f5;
+            /* Polaroid frame: 88mm × 107mm = 0.822 aspect ratio */
+            aspect-ratio: 1 / 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+            width: 100%;
+            padding: 0;
+        }
+        
+        .polaroid-content:hover {
+            background: #eeeeee;
+        }
+        
+        .polaroid-content.dragover {
+            background: #e8f0ff;
+        }
+        
+        .polaroid-image {
+            /* Image area: 79mm × 79mm (square) */
+            aspect-ratio: 1 / 1;
+            width: 100%;
+            max-width: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: none;
+            flex-shrink: 0;
+        }
+        
+        .polaroid-image.active {
+            display: block;
+        }
+        
+        .upload-placeholder {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border: 2px dashed #667eea;
-            border-radius: 8px;
-            padding: 40px 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: #f8f9ff;
-        }
-        
-        .upload-label:hover {
-            border-color: #764ba2;
-            background: #f0f1ff;
-        }
-        
-        .upload-label.dragover {
-            border-color: #764ba2;
-            background: #e8eaff;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            gap: 10px;
+            color: #999;
         }
         
         .upload-icon {
             font-size: 48px;
-            margin-bottom: 10px;
         }
         
         .upload-text {
-            text-align: center;
-            color: #667eea;
             font-weight: 600;
-            margin-bottom: 5px;
+            color: #666;
+            font-size: 16px;
         }
         
         .upload-hint {
-            text-align: center;
-            color: #999;
             font-size: 12px;
+            color: #999;
+        }
+        
+        .crop-mode-selector {
+            display: none;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        
+        .crop-mode-selector.active {
+            display: flex;
+        }
+        
+        .crop-btn {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .crop-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .crop-btn.active {
+            background: #667eea;
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .polaroid-label {
+            padding: 12px;
+            background: white;
+            text-align: center;
+            color: #666;
+            font-weight: 500;
+            font-size: 14px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .filename {
+            color: #666;
+            font-size: 13px;
+            font-weight: 600;
+            word-break: break-word;
+            max-width: 100%;
         }
         
         #fileInput {
             display: none;
         }
         
-        .filename {
-            text-align: center;
-            color: #666;
-            font-size: 14px;
-            margin-top: 10px;
-        }
-        
         button {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            padding: 12px 30px;
-            border-radius: 8px;
+            padding: 14px 40px;
+            border-radius: 50px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            width: 100%;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
         }
         
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
         }
         
         button:active {
@@ -133,12 +229,12 @@
         .loading {
             display: none;
             text-align: center;
-            margin-top: 20px;
+            margin-top: 10px;
         }
         
         .spinner {
-            border: 4px solid #f0f0f0;
-            border-top: 4px solid #667eea;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -151,12 +247,28 @@
             100% { transform: rotate(360deg); }
         }
         
+        .loading p {
+            color: white;
+            font-size: 14px;
+        }
+        
         .message {
-            padding: 15px;
+            padding: 12px 20px;
             border-radius: 8px;
-            margin-top: 20px;
             text-align: center;
             display: none;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .success {
@@ -174,16 +286,26 @@
 </head>
 <body>
     <div class="container">
-        <h1>📸 Wedding Greeting Card</h1>
-        <p class="subtitle">Upload your photo to save it</p>
+        <div class="header">
+            <h1>📸 Wedding Greeting Card</h1>
+            <p class="subtitle">Upload your photo to print it at the reception desk!</p>
+        </div>
         
         <div class="upload-section">
-            <label class="upload-label" id="uploadLabel" for="fileInput">
-                <div class="upload-icon">📷</div>
-                <div class="upload-text">Click or drag to upload</div>
-                <div class="upload-hint">JPEG, PNG, GIF or WebP (max 50MB)</div>
-                <div class="filename" id="filename"></div>
-            </label>
+            <!-- Polaroid Frame -->
+            <div class="polaroid-frame" id="uploadLabel">
+                <div class="polaroid-content" id="polaroidContent">
+                    <div class="polaroid-image" id="polaroidImage"></div>
+                    <div class="upload-placeholder" id="uploadPlaceholder">
+                        <div class="upload-icon">📷</div>
+                        <div class="upload-text">Click to Upload</div>
+                        <div class="upload-hint">or drag & drop</div>
+                    </div>
+                </div>
+                <div class="polaroid-label">
+                    <div class="filename" id="filename">Click to select a photo</div>
+                </div>
+            </div>
             
             <button type="submit" id="submitBtn" disabled>Upload Photo</button>
             
@@ -201,6 +323,9 @@
     <script>
         const fileInput = document.getElementById('fileInput');
         const uploadLabel = document.getElementById('uploadLabel');
+        const polaroidContent = document.getElementById('polaroidContent');
+        const polaroidImage = document.getElementById('polaroidImage');
+        const uploadPlaceholder = document.getElementById('uploadPlaceholder');
         const submitBtn = document.getElementById('submitBtn');
         const loading = document.getElementById('loading');
         const message = document.getElementById('message');
@@ -209,9 +334,9 @@
         let selectedFile = null;
         
         // Click to open file dialog
-        // uploadLabel.addEventListener('click', () => {
-        //     fileInput.click();
-        // });
+        uploadLabel.addEventListener('click', () => {
+            fileInput.click();
+        });
         
         // File selection handler
         fileInput.addEventListener('change', (e) => {
@@ -221,16 +346,16 @@
         // Drag and drop handlers
         uploadLabel.addEventListener('dragover', (e) => {
             e.preventDefault();
-            uploadLabel.classList.add('dragover');
+            polaroidContent.classList.add('dragover');
         });
         
         uploadLabel.addEventListener('dragleave', () => {
-            uploadLabel.classList.remove('dragover');
+            polaroidContent.classList.remove('dragover');
         });
         
         uploadLabel.addEventListener('drop', (e) => {
             e.preventDefault();
-            uploadLabel.classList.remove('dragover');
+            polaroidContent.classList.remove('dragover');
             const files = e.dataTransfer.files;
             if (files.length > 0) {
                 handleFileSelect(files[0]);
@@ -250,6 +375,15 @@
                 showMessage('File size must be less than 50MB', 'error');
                 return;
             }
+            
+            // Preview the image in the polaroid frame
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                polaroidImage.style.backgroundImage = `url(${e.target.result})`;
+                polaroidImage.classList.add('active');
+                uploadPlaceholder.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
             
             selectedFile = file;
             filename.textContent = file.name;
@@ -277,7 +411,7 @@
                 const data = await response.json();
                 
                 if (response.ok) {
-                    showMessage('Photo uploaded successfully! ✨', 'success');
+                    showMessage('Photo uploaded successfully! We\'re printing your card at the reception desk ✨\nอัปโหลดสำเร็จ! เรากำลังพิมพ์การ์ดอวยพรของคุณที่โต๊ะรับแขก สามารถเขียนข้อความอวยพรบ่าวสาวได้บนการ์ดแล้วแปะบนบอร์ดเลยครับ', 'success');
                     resetForm();
                 } else {
                     showMessage(`Error: ${data.error || 'Upload failed'}`, 'error');
@@ -305,8 +439,11 @@
         function resetForm() {
             selectedFile = null;
             fileInput.value = '';
-            filename.textContent = '';
+            filename.textContent = 'Click to select a photo';
             submitBtn.disabled = true;
+            polaroidImage.style.backgroundImage = '';
+            polaroidImage.classList.remove('active');
+            uploadPlaceholder.style.display = 'flex';
         }
     </script>
 </body>
