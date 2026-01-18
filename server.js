@@ -3,11 +3,16 @@ const cors = require('cors');
 const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
+const https = require('https');
 const { google } = require('googleapis');
 const winston = require('winston');
+const { GoogleGenAI } = require('@google/genai');
+const sharp = require('sharp');
+const { log } = require('console');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const USE_HTTPS = process.env.USE_HTTPS !== 'false'; // Enable HTTPS by default
 
 // Create logs directory if it doesn't exist
 const logsDir = path.join(__dirname, 'logs');
@@ -53,6 +58,7 @@ const logger = winston.createLogger({
 // Load configuration and credentials
 const config = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json'), 'utf8'));
 const credentials = JSON.parse(fs.readFileSync(path.join(__dirname, 'credentials.json'), 'utf8'));
+const imageStylePrompts = JSON.parse(fs.readFileSync(path.join(__dirname, 'image-style-prompts.json'), 'utf8'));
 
 // Setup multer for file uploads
 const upload = multer({ storage: multer.memoryStorage() });
@@ -61,6 +67,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 app.set('trust proxy', 1); // Trust the first proxy (Nginx on Bitnami)
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Serve static files with caching headers
 app.use(express.static(path.join(__dirname, 'public'), {
@@ -111,9 +118,131 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+app.get('/shake-detector', (req, res) => {
+  logger.info('Shake detector page requested', { ip: req.ip });
+  res.sendFile(path.join(__dirname, 'public', 'shake-detector.html'));
+});
+
 app.get('/api/health', (req, res) => {
   logger.info('Health check requested');
   res.json({ status: 'Server is running', timestamp: new Date() });
+});
+
+// Optimize image endpoint using Google Gemini
+app.post('/api/optimize-image', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      logger.warn('Image optimization attempt without file', { ip: req.ip });
+      return res.status(400).json({ error: 'No image uploaded' });
+    }
+
+    // Validate that the uploaded file is an image
+    if (!req.file.mimetype.startsWith('image/')) {
+      logger.warn('Invalid file type for optimization', { 
+        mimetype: req.file.mimetype, 
+        ip: req.ip 
+      });
+      return res.status(400).json({ error: 'File must be an image' });
+    }
+
+    if (typeof req.body.imageStyleIndex === 'undefined' || isNaN(req.body.imageStyleIndex) || req.body.imageStyleIndex < 0 || req.body.imageStyleIndex >= imageStylePrompts.length) {
+      logger.warn('Invalid image style index', { 
+        imageStyleIndex: req.body.imageStyleIndex,
+        ip: req.ip
+      });
+      return res.status(400).json({ error: 'Invalid image style selected' });
+    }
+
+    const imageStyleIndex = parseInt(req.body.imageStyleIndex);
+
+    logger.info('Image optimization started', { 
+      filename: req.file.originalname, 
+      filesize: req.file.size,
+      mimetype: req.file.mimetype,
+      ip: req.ip,
+      imageStyleIndex: req.body.imageStyleIndex
+    });
+
+    // Get the Gemini API key from credentials
+    const geminiApiKey = credentials.installed?.gemini_api_key;
+    if (!geminiApiKey) {
+      logger.error('Gemini API key not found in credentials');
+      return res.status(500).json({ error: 'Gemini API key not configured' });
+    }
+
+    // Initialize Gemini API
+    const genAI = new GoogleGenAI({apiKey: geminiApiKey});
+
+    // Convert image buffer to base64
+    const base64Image = req.file.buffer.toString('base64');
+    const mimeType = req.file.mimetype;
+
+    // Send image to Gemini for optimization and image generation
+    if (imageStylePrompts.length === 0) {
+      logger.error('No image style prompts found');
+      return res.status(500).json({ error: 'Image style prompts not configured' });
+    }
+
+    const prompt = [
+    { text: imageStylePrompts[req.body.imageStyleIndex]?.text || imageStylePrompts.find(prompt => prompt.default)?.text || imageStylePrompts[0].text },
+    {
+      inlineData: {
+        mimeType: mimeType,
+        data: base64Image,
+      },
+    },
+  ];
+
+    const response = await genAI.models.generateContent({
+      model: "gemini-2.5-flash-image",
+      contents: prompt,
+    });
+    
+    // Extract the generated image from response
+    const imagePart = response.candidates[0]?.content?.parts?.find(
+      part => part.inlineData?.mimeType?.startsWith('image/')
+    );
+
+    if (!imagePart || !imagePart.inlineData?.data) {
+      logger.error('No image generated from Gemini');
+      return res.status(500).json({ error: 'Failed to generate optimized image' });
+    }
+
+    // Get the generated image data
+    const optimizedImageBase64 = imagePart.inlineData.data;
+    const optimizedImageBuffer = Buffer.from(optimizedImageBase64, 'base64');
+
+    // Optimize the image further using sharp for compression and quality
+    const finalImageBuffer = await sharp(optimizedImageBuffer)
+      .resize(1024, 1024, {
+        fit: 'inside',
+        withoutEnlargement: true
+      })
+      .png({ quality: 95, progressive: true })
+      .toBuffer();
+
+    logger.info('Image optimization completed successfully', {
+      filename: req.file.originalname,
+      originalSize: req.file.size,
+      optimizedSize: finalImageBuffer.length,
+      imageStyleIndex: imageStyleIndex,
+      ip: req.ip
+    });
+
+    // Set response headers for image
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Content-Disposition', `attachment; filename="optimized_${Date.now()}.png"`);
+    res.send(finalImageBuffer);
+
+  } catch (error) {
+    logger.error('Image optimization error', { 
+      error: error.message,
+      stack: error.stack,
+      filename: req.file?.originalname,
+      ip: req.ip 
+    });
+    res.status(500).json({ error: error.message || 'Image optimization failed' });
+  }
 });
 
 // Upload endpoint
@@ -134,7 +263,7 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
       filename: req.file.originalname, 
       filesize: req.file.size,
       mimetype: req.file.mimetype,
-      ip: req.ip 
+      ip: req.ip
     });
 
     const drive = getDriveService();
@@ -187,8 +316,48 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-// Start server
-app.listen(PORT, '0.0.0.0', () => {
-  logger.info(`Server started successfully`, { port: PORT, environment: process.env.NODE_ENV || 'development' });
-});
+// Start server with HTTPS or HTTP
+if (USE_HTTPS) {
+  try {
+    const certPath = path.join(__dirname, 'certs', 'server.crt');
+    const keyPath = path.join(__dirname, 'certs', 'server.key');
+    
+    // Check if certificates exist
+    if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
+      logger.warn('SSL certificates not found. Falling back to HTTP.');
+      logger.warn('To generate certificates, run: npm run generate-certs');
+      startHttpServer();
+    } else {
+      const options = {
+        cert: fs.readFileSync(certPath),
+        key: fs.readFileSync(keyPath)
+      };
+      
+      https.createServer(options, app).listen(PORT, '0.0.0.0', () => {
+        logger.info(`HTTPS Server started successfully`, { 
+          port: PORT, 
+          protocol: 'HTTPS',
+          environment: process.env.NODE_ENV || 'development',
+          url: `https://localhost:${PORT}`
+        });
+      });
+    }
+  } catch (error) {
+    logger.error('Error starting HTTPS server', { error: error.message });
+    startHttpServer();
+  }
+} else {
+  startHttpServer();
+}
+
+function startHttpServer() {
+  app.listen(PORT, '0.0.0.0', () => {
+    logger.info(`HTTP Server started successfully`, { 
+      port: PORT, 
+      protocol: 'HTTP',
+      environment: process.env.NODE_ENV || 'development',
+      url: `http://localhost:${PORT}`
+    });
+  });
+}
 

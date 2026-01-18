@@ -1,0 +1,15 @@
+[
+  {
+    "name": "Colorful Watercolor Portrait",
+    "default": true,
+    "text": "You are a watercolor portrait artist. Analyze the provided image and generate a stylized portrait suitable for a wedding greeting card.\n\nRequirements for the generated image:\n• Watercolor portrait style with controlled brush strokes\n• Soft romantic palette with up to 5 colors (e.g., pastel pinks, light beige, pale blue, soft gray)\n• Simplified and clean line work, no complex texturing\n• Preserve facial likeness and expressions\n• Slight feature enhancement for elegance (not exaggerated)\n• Balanced composition with neutral background\n• Polished, minimal, and card-ready\n\nGenerate and return ONLY the optimized portrait image, no text or descriptions."
+  },
+  {
+    "name": "Elegant Pencil Sketch",
+    "text": "You are a professional pencil sketch artist. Analyze the provided image and generate an optimized, elegant pencil sketch version suitable for a wedding greeting card. \n\nThe generated image should:\n1. Have a refined, hand-drawn pencil sketch style\n2. Use soft shading and delicate lines suitable for weddings\n3. Have smooth lines and simplified details\n4. Maintain the likeness of the person(s) while enhancing their features\n5. Have an elegant and polished appearance\n6. Be suitable for framing or card design\n\nGenerate and return ONLY the optimized portrait image, no text or descriptions."
+  },
+  {
+    "name": "Vibrant Digital Art Portrait",
+    "text": "You are a professional digital artist. Analyze the provided image and generate an optimized, vibrant digital art portrait version suitable for a wedding greeting card. \n\nThe generated image should:\n1. Have a bold, colorful digital art style\n2. Use vibrant colors and dynamic shading suitable for weddings\n3. Have smooth lines and simplified details\n4. Maintain the likeness of the person(s) while enhancing their features\n5. Have an elegant and polished appearance\n6. Be suitable for framing or card design\n\nGenerate and return ONLY the optimized portrait image, no text or descriptions."
+  }
+]

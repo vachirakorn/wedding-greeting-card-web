@@ -228,7 +228,112 @@
             cursor: not-allowed;
             transform: none;
         }
-        
+
+        /* Toggle Button Styles */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #667eea;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        .toggle-label {
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Image Style Selector */
+        .style-selector {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            align-items: center;
+        }
+
+        .style-selector.active {
+            display: flex;
+        }
+
+        .style-label {
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .style-dropdown {
+            background: white;
+            color: #333;
+            border: 2px solid #667eea;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            max-width: 300px;
+            width: 100%;
+        }
+
+        .style-dropdown:hover {
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .style-dropdown:focus {
+            outline: none;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
         .loading {
             display: none;
             text-align: center;
@@ -365,6 +470,37 @@
                 border-radius: 6px;
                 font-size: 12px;
             }
+
+            .toggle-container {
+                gap: 10px;
+            }
+
+            .toggle-switch {
+                width: 50px;
+                height: 28px;
+            }
+
+            .toggle-slider:before {
+                height: 22px;
+                width: 22px;
+            }
+
+            input:checked + .toggle-slider:before {
+                transform: translateX(22px);
+            }
+
+            .toggle-label {
+                font-size: 12px;
+            }
+
+            .style-label {
+                font-size: 12px;
+            }
+
+            .style-dropdown {
+                font-size: 12px;
+                padding: 8px 12px;
+            }
         }
     </style>
 </head>
@@ -390,8 +526,27 @@
                     <div class="filename" id="filename">Click to select a photo</div>
                 </div>
             </div>
+
+            <!-- Optimize Image Toggle Button -->
+            <div class="toggle-container" id="toggleContainer" style="display: none;">
+                <span class="toggle-label">เพิ่มความน่ารัก:</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="optimizeToggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+
+            <!-- Image Style Selector -->
+            <div class="style-selector" id="styleSelector" style="display: none;">
+                <span class="style-label">Select Style:</span>
+                <select class="style-dropdown" id="imageStyleSelect">
+                    <option value="0">Colorful Watercolor Portrait</option>
+                    <option value="1">Elegant Pencil Sketch</option>
+                    <option value="2">Vibrant Digital Art Portrait</option>
+                </select>
+            </div>
             
-            <button type="submit" id="submitBtn" disabled>Upload Photo</button>
+            <button type="submit" id="submitBtn" disabled>พิมพ์ภาพ</button>
             
             <div class="loading" id="loading">
                 <div class="spinner"></div>
@@ -404,131 +559,6 @@
     
     <input type="file" id="fileInput" accept="image/*" />
     
-    <script>
-        const fileInput = document.getElementById('fileInput');
-        const uploadLabel = document.getElementById('uploadLabel');
-        const polaroidContent = document.getElementById('polaroidContent');
-        const polaroidImage = document.getElementById('polaroidImage');
-        const uploadPlaceholder = document.getElementById('uploadPlaceholder');
-        const submitBtn = document.getElementById('submitBtn');
-        const loading = document.getElementById('loading');
-        const message = document.getElementById('message');
-        const filename = document.getElementById('filename');
-        
-        let selectedFile = null;
-        
-        // Click to open file dialog
-        uploadLabel.addEventListener('click', () => {
-            fileInput.click();
-        });
-        
-        // File selection handler
-        fileInput.addEventListener('change', (e) => {
-            handleFileSelect(e.target.files[0]);
-        });
-        
-        // Drag and drop handlers
-        uploadLabel.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            polaroidContent.classList.add('dragover');
-        });
-        
-        uploadLabel.addEventListener('dragleave', () => {
-            polaroidContent.classList.remove('dragover');
-        });
-        
-        uploadLabel.addEventListener('drop', (e) => {
-            e.preventDefault();
-            polaroidContent.classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                handleFileSelect(files[0]);
-            }
-        });
-        
-        // Handle file selection
-        function handleFileSelect(file) {
-            if (!file) return;
-            
-            if (!file.type.startsWith('image/')) {
-                showMessage('Please select a valid image file', 'error');
-                return;
-            }
-            
-            if (file.size > 50 * 1024 * 1024) {
-                showMessage('File size must be less than 50MB', 'error');
-                return;
-            }
-            
-            // Preview the image in the polaroid frame
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                polaroidImage.style.backgroundImage = `url(${e.target.result})`;
-                polaroidImage.classList.add('active');
-                uploadPlaceholder.style.display = 'none';
-            };
-            reader.readAsDataURL(file);
-            
-            selectedFile = file;
-            filename.textContent = file.name;
-            submitBtn.disabled = false;
-            clearMessage();
-        }
-        
-        // Submit button handler
-        submitBtn.addEventListener('click', async () => {
-            if (!selectedFile) return;
-            
-            const formData = new FormData();
-            formData.append('file', selectedFile);
-            
-            submitBtn.disabled = true;
-            loading.style.display = 'block';
-            clearMessage();
-            
-            try {
-                const response = await fetch('/api/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    showMessage('อัปโหลดสำเร็จ! ขั้นตอนที่ 2: เรากำลังพิมพ์การ์ดอวยพรของคุณที่โต๊ะรับแขก สามารถเขียนข้อความอวยพรบ่าวสาวบนการ์ด แล้วนำไปจัดแสดงบนบอร์ดเลยครับ 👰🤵💌', 'success');
-                    resetForm();
-                } else {
-                    showMessage(`Error: ${data.error || 'Upload failed'}`, 'error');
-                    submitBtn.disabled = false;
-                }
-            } catch (error) {
-                showMessage(`Error: ${error.message}`, 'error');
-                submitBtn.disabled = false;
-            } finally {
-                loading.style.display = 'none';
-            }
-        });
-        
-        function showMessage(text, type) {
-            message.textContent = text;
-            message.className = `message ${type}`;
-            message.style.display = 'block';
-        }
-        
-        function clearMessage() {
-            message.style.display = 'none';
-            message.textContent = '';
-        }
-        
-        function resetForm() {
-            selectedFile = null;
-            fileInput.value = '';
-            filename.textContent = 'Click to select a photo';
-            submitBtn.disabled = true;
-            polaroidImage.style.backgroundImage = '';
-            polaroidImage.classList.remove('active');
-            uploadPlaceholder.style.display = 'flex';
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>

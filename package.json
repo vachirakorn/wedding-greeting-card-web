@@ -4,15 +4,18 @@
   "description": "Express.js server for wedding greeting card application",
   "main": "node.js",
   "scripts": {
-    "start": "node node.js",
-    "dev": "nodemon node.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "generate-certs": "node generate-certs-node.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
+    "@google/genai": "^1.37.0",
     "cors": "^2.8.5",
-    "multer": "^1.4.5-lts.1",
+    "express": "^4.18.2",
     "google-auth-library": "^9.0.0",
     "googleapis": "^118.0.0",
+    "multer": "^1.4.5-lts.1",
+    "sharp": "^0.33.0",
     "winston": "^3.11.0"
   },
   "devDependencies": {

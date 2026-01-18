@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shake Detector - Wedding Greeting Card</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .status {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f0f0f0;
+        }
+        
+        .status-text {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .status-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        .status.not-supported {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status.not-supported .status-value {
+            color: #721c24;
+        }
+        
+        .status.active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.active .status-value {
+            color: #155724;
+        }
+        
+        /* Shake Intensity Visualization */
+        .shake-meter {
+            margin-bottom: 30px;
+        }
+        
+        .meter-label {
+            color: #666;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .meter-bar {
+            width: 100%;
+            height: 30px;
+            background: linear-gradient(90deg, #28a745 0%, #ffc107 60%, #dc3545 100%);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .meter-fill {
+            height: 100%;
+            width: 0%;
+            background: rgba(255, 255, 255, 0.8);
+            transition: width 0.1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            font-weight: 600;
+            font-size: 12px;
+            color: #333;
+        }
+        
+        /* Data Display */
+        .data-display {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .data-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .data-label {
+            color: #666;
+            font-weight: 600;
+        }
+        
+        .data-value {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        /* Shake Detection History */
+        .history {
+            margin-bottom: 20px;
+        }
+        
+        .history-label {
+            color: #666;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .history-chart {
+            width: 100%;
+            height: 150px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .history-canvas {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            flex: 1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 430px) {
+            .container {
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 22px;
+            }
+            
+            .subtitle {
+                font-size: 12px;
+            }
+            
+            .data-display {
+                font-size: 11px;
+                padding: 15px;
+            }
+            
+            .meter-bar {
+                height: 24px;
+            }
+            
+            .history-chart {
+                height: 120px;
+            }
+            
+            button {
+                padding: 10px 15px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 Shake Detector</h1>
+            <p class="subtitle">Move your device to detect shaking</p>
+        </div>
+        
+        <div class="status" id="status">
+            <div class="status-text">Status</div>
+            <div class="status-value" id="statusText">Initializing...</div>
+        </div>
+        
+        <div class="shake-meter">
+            <div class="meter-label">Shake Intensity</div>
+            <div class="meter-bar">
+                <div class="meter-fill" id="meterFill">0%</div>
+            </div>
+        </div>
+        
+        <div class="data-display">
+            <div class="data-row">
+                <span class="data-label">Current Force:</span>
+                <span class="data-value" id="force">0.0 G</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Max Force:</span>
+                <span class="data-value" id="maxForce">0.0 G</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Acceleration X:</span>
+                <span class="data-value" id="accelX">0.0 m/s²</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Acceleration Y:</span>
+                <span class="data-value" id="accelY">0.0 m/s²</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Acceleration Z:</span>
+                <span class="data-value" id="accelZ">0.0 m/s²</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Shake Count:</span>
+                <span class="data-value" id="shakeCount">0</span>
+            </div>
+        </div>
+        
+        <div class="history">
+            <div class="history-label">Shake History</div>
+            <div class="history-chart">
+                <canvas class="history-canvas" id="historyChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="buttons">
+            <button id="resetBtn">Reset</button>
+            <button class="btn-secondary" onclick="window.location.href='/'">Upload Page</button>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
+    <script>
+        
+        const statusEl = document.getElementById('status');
+        const statusText = document.getElementById('statusText');
+        const meterFill = document.getElementById('meterFill');
+        const forceEl = document.getElementById('force');
+        const maxForceEl = document.getElementById('maxForce');
+        const accelXEl = document.getElementById('accelX');
+        const accelYEl = document.getElementById('accelY');
+        const accelZEl = document.getElementById('accelZ');
+        const shakeCountEl = document.getElementById('shakeCount');
+        const resetBtn = document.getElementById('resetBtn');
+        const canvas = document.getElementById('historyChart');
+        const ctx = canvas.getContext('2d');
+        
+        let maxForce = 0;
+        let shakeCount = 0;
+        let shakeHistory = [];
+        let isListening = false;
+        const HISTORY_LENGTH = 60;
+        const SHAKE_THRESHOLD = 25; // m/s²
+        
+        // Initialize canvas
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Check device motion support
+        function checkSupport() {
+            console.log('Checking device motion support...');
+            console.log('DeviceMotionEvent:', typeof DeviceMotionEvent);
+            console.log('requestPermission:', typeof DeviceMotionEvent?.requestPermission);
+            
+            if (typeof DeviceMotionEvent !== 'undefined') {
+                if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                    // iOS 13+ requires permission
+                    console.log('iOS 13+ detected - requiring permission');
+                    statusText.textContent = 'Permission Required';
+                    statusEl.classList.add('not-supported');
+                    resetBtn.textContent = 'Request Permission';
+                    resetBtn.onclick = requestPermission;
+                } else {
+                    // Android or older iOS
+                    console.log('Android/older iOS detected - auto starting');
+                    statusText.textContent = 'Ready to Detect';
+                    statusEl.classList.add('active');
+                    startListening();
+                }
+            } else {
+                console.error('DeviceMotionEvent not supported');
+                statusText.textContent = 'Not Supported';
+                statusEl.classList.add('not-supported');
+                resetBtn.disabled = true;
+            }
+        }
+        
+        function requestPermission() {
+            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                DeviceMotionEvent.requestPermission()
+                    .then(permissionState => {
+                        console.log('Permission state:', permissionState);
+                        if (permissionState === 'granted') {
+                            statusText.textContent = 'Ready to Detect';
+                            statusEl.classList.remove('not-supported');
+                            statusEl.classList.add('active');
+                            resetBtn.textContent = 'Reset';
+                            resetBtn.onclick = reset;
+                            startListening();
+                        } else if (permissionState === 'denied') {
+                            statusText.textContent = 'Permission Denied - Try Again';
+                            statusEl.classList.add('not-supported');
+                            resetBtn.textContent = 'Request Permission';
+                            resetBtn.onclick = requestPermission;
+                        } else {
+                            // prompt state - try to listen anyway
+                            statusText.textContent = 'Attempting to Enable...';
+                            statusEl.classList.add('active');
+                            startListening();
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Permission error:', err);
+                        statusText.textContent = 'Error: Check Settings';
+                        statusEl.classList.add('not-supported');
+                        resetBtn.textContent = 'Retry';
+                        resetBtn.onclick = requestPermission;
+                    });
+            }
+        }
+        
+        function startListening() {
+            if (isListening) return;
+            
+            // Add event listener
+            window.addEventListener('devicemotion', handleDeviceMotion);
+            isListening = true;
+            
+            // Set a timeout to check if we're actually getting data
+            setTimeout(() => {
+                if (maxForce === 0 && isListening) {
+                    console.warn('No device motion data received');
+                    if (typeof DeviceMotionEvent === 'undefined' || typeof DeviceMotionEvent.requestPermission !== 'function') {
+                        statusText.textContent = 'Ready (Motion Pending)';
+                    }
+                }
+            }, 2000);
+            
+            console.log('Device motion listener started');
+        }
+        
+        function handleDeviceMotion(event) {
+            const accel = event.acceleration;
+            
+            if (!accel || accel.x === null) return;
+            
+            // Calculate total force (magnitude of acceleration vector)
+            const force = Math.sqrt(accel.x ** 2 + accel.y ** 2 + accel.z ** 2);
+            
+            // Update max force
+            if (force > maxForce) {
+                maxForce = force;
+            }
+            
+            // Detect shake
+            if (force > SHAKE_THRESHOLD) {
+                shakeCount++;
+            }
+            
+            // Update UI
+            updateDisplay(accel.x, accel.y, accel.z, force);
+        }
+        
+        function updateDisplay(x, y, z, force) {
+            // Update values
+            forceEl.textContent = force.toFixed(2) + ' G';
+            maxForceEl.textContent = maxForce.toFixed(2) + ' G';
+            accelXEl.textContent = x.toFixed(2) + ' m/s²';
+            accelYEl.textContent = y.toFixed(2) + ' m/s²';
+            accelZEl.textContent = z.toFixed(2) + ' m/s²';
+            shakeCountEl.textContent = shakeCount;
+            
+            // Update meter
+            const percentage = Math.min((force / 50) * 100, 100);
+            meterFill.style.width = percentage + '%';
+            meterFill.textContent = Math.round(percentage) + '%';
+            
+            // Add to history
+            shakeHistory.push(force);
+            if (shakeHistory.length > HISTORY_LENGTH) {
+                shakeHistory.shift();
+            }
+            
+            // Draw chart
+            drawChart();
+        }
+        
+        function drawChart() {
+            const width = canvas.width;
+            const height = canvas.height;
+            const padding = 10;
+            const chartWidth = width - (padding * 2);
+            const chartHeight = height - (padding * 2);
+            
+            // Clear canvas
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fillRect(0, 0, width, height);
+            
+            // Draw grid line at threshold
+            ctx.strokeStyle = '#ddd';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            const thresholdY = padding + (chartHeight * (1 - SHAKE_THRESHOLD / 50));
+            ctx.beginPath();
+            ctx.moveTo(padding, thresholdY);
+            ctx.lineTo(width - padding, thresholdY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Draw data
+            if (shakeHistory.length > 1) {
+                ctx.strokeStyle = '#667eea';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                
+                for (let i = 0; i < shakeHistory.length; i++) {
+                    const x = padding + (i / (HISTORY_LENGTH - 1)) * chartWidth;
+                    const y = padding + chartHeight - (shakeHistory[i] / 50) * chartHeight;
+                    
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.stroke();
+            }
+            
+            // Draw axes
+            ctx.strokeStyle = '#999';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, height - padding);
+            ctx.lineTo(width - padding, height - padding);
+            ctx.stroke();
+        }
+        
+        function reset() {
+            maxForce = 0;
+            shakeCount = 0;
+            shakeHistory = [];
+            updateDisplay(0, 0, 0, 0);
+        }
+        
+        resetBtn.addEventListener('click', reset);
+        
+        // Initialize on load
+        checkSupport();
+    </script>
+</body>
+</html>
